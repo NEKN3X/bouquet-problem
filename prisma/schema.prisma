@@ -16,22 +16,24 @@ datasource db {
 
 // 花
 model Flower {
-    id                   Int                   @id @default(autoincrement())
-    name                 String
-    deliveryDays         Int // 発注リードタイム
-    purchaseQuantityUnit Int // 発注単位
-    maintanableDays      Int // 品質維持可能日数
-    purchaseOrderDetails PurchaseOrderDetail[]
-    flowerLots           FlowerLot[]
-    bouquetComponents    BouquetComponent[]
+    id               Int                   @id @default(autoincrement())
+    code             String
+    name             String
+    deliveryDays     Int // 発注リードタイム
+    purchaseUnit     Int // 発注単位
+    maintainableDays Int // 品質維持可能日数 @map("maintanableDays")
+    purchaseDetails  PurchaseOrderDetail[]
+    flowerLots       FlowerLot[]
+    components       BouquetComponent[]
 }
 
 // 花束
 model Bouquet {
-    id                Int                @id @default(autoincrement())
-    name              String
-    bouquetComponents BouquetComponent[]
-    salesOrders       SalesOrder[]
+    id          Int                @id @default(autoincrement())
+    code        String
+    name        String
+    components  BouquetComponent[]
+    salesOrders SalesOrder[]
 }
 
 // 花束構成
@@ -46,12 +48,12 @@ model BouquetComponent {
 
 // 花の発注
 model PurchaseOrder {
-    id                   Int                   @id @default(autoincrement())
-    supplierName         String // 仕入先
-    orderedAt            DateTime
-    deliveryAt           DateTime              @db.Date // 希望納品日
-    purchaseOrderDetails PurchaseOrderDetail[]
-    purchaseOrderArrival PurchaseOrderArrival?
+    id              Int                   @id @default(autoincrement())
+    supplierName    String // 仕入先
+    orderedAt       DateTime              @default(now())
+    deliveryDate    DateTime              @db.Date // 希望納品日 @map("deliveryAt")
+    purchaseDetails PurchaseOrderDetail[]
+    purchaseArrival PurchaseOrderArrival?
 }
 
 // 花の発注明細
