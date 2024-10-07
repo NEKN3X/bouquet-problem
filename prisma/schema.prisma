@@ -14,61 +14,129 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
+// 花
+model Flower {
+    id               Int                   @id @default(autoincrement())
+    code             String
+    name             String
+    deliveryDays     Int // 発注リードタイム
+    purchaseUnit     Int // 発注単位
+    maintainableDays Int // 品質維持可能日数
+    purchaseDetails  PurchaseOrderDetail[]
+    flowerLots       FlowerLot[]
+    components       BouquetComponent[]
 }
 
-// Necessary for Next auth
-model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? @db.Text
-    access_token             String? // @db.Text
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? // @db.Text
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
-
-    @@unique([provider, providerAccountId])
+// 花束
+model Bouquet {
+    id          Int                @id @default(autoincrement())
+    code        String
+    name        String
+    components  BouquetComponent[]
+    salesOrders SalesOrder[]
 }
 
-model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+// 花束構成
+model BouquetComponent {
+    id             Int     @id @default(autoincrement())
+    bouquetId      Int
+    bouquet        Bouquet @relation(fields: [bouquetId], references: [id])
+    flowerId       Int
+    flower         Flower  @relation(fields: [flowerId], references: [id])
+    flowerQuantity Int
 }
 
-model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+// 花の発注
+model PurchaseOrder {
+    id              Int                   @id @default(autoincrement())
+    supplierName    String // 仕入先
+    orderedAt       DateTime              @default(now())
+    deliveryDate    DateTime              @db.Date // 希望納品日
+    purchaseDetails PurchaseOrderDetail[]
+    purchaseArrival PurchaseOrderArrival?
 }
 
-model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+// 花の発注明細
+model PurchaseOrderDetail {
+    id              Int           @id @default(autoincrement())
+    purchaseOrderId Int
+    purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+    flowerId        Int
+    flower          Flower        @relation(fields: [flowerId], references: [id])
+    orderQuantity   Int
+}
 
-    @@unique([identifier, token])
+// 花の入荷イベント
+model PurchaseOrderArrival {
+    id              Int           @id @default(autoincrement())
+    purchaseOrderId Int           @unique
+    purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+    arrivedAt       DateTime
+    flowerLots      FlowerLot[]
+}
+
+// 花のロット
+model FlowerLot {
+    id                        Int                        @id @default(autoincrement())
+    purchaseOrderArrivalId    Int
+    purchaseOrderArrival      PurchaseOrderArrival       @relation(fields: [purchaseOrderArrivalId], references: [purchaseOrderId])
+    arrivalDate               DateTime                   @db.Date
+    disposalDate              DateTime                   @db.Date
+    lotSize                   Int
+    flowerId                  Int
+    flower                    Flower                     @relation(fields: [flowerId], references: [id])
+    salesOrderShipmentDetails SalesOrderShipmentDetail[]
+    flowerDisposal            FlowerDisposal[]
+}
+
+// 受注
+model SalesOrder {
+    id                 Int                 @id @default(autoincrement())
+    customerId         Int
+    customer           Customer            @relation(fields: [customerId], references: [id])
+    senderName         String
+    bouquetId          Int
+    bouquet            Bouquet             @relation(fields: [bouquetId], references: [id])
+    deliveryDate       DateTime            @db.Date
+    deliveryAddress1   String
+    deliveryAddress2   String?
+    deliveryMessage    String?
+    orderedAt          DateTime            @default(now())
+    salesOrderShipment SalesOrderShipment?
+}
+
+// 顧客
+model Customer {
+    id          Int          @id @default(autoincrement())
+    name        String
+    email       String
+    salesOrders SalesOrder[]
+}
+
+// 注文の出荷
+model SalesOrderShipment {
+    id                        Int                        @id @default(autoincrement())
+    salesOrderId              Int                        @unique
+    salesOrder                SalesOrder                 @relation(fields: [salesOrderId], references: [id])
+    shippedAt                 DateTime                   @default(now())
+    salesOrderShipmentDetails SalesOrderShipmentDetail[]
+}
+
+// 花束の出荷明細
+model SalesOrderShipmentDetail {
+    id                   Int                @id @default(autoincrement())
+    salesOrderShipmentId Int
+    salesOrderShipment   SalesOrderShipment @relation(fields: [salesOrderShipmentId], references: [id])
+    flowerLotId          Int
+    flowerLot            FlowerLot          @relation(fields: [flowerLotId], references: [id])
+    shippedQuantity      Int
+}
+
+// 花の廃棄
+model FlowerDisposal {
+    id               Int       @id @default(autoincrement())
+    flowerLotId      Int
+    flowerLot        FlowerLot @relation(fields: [flowerLotId], references: [id])
+    disposalQuantity Int
+    disposedAt       DateTime  @default(now())
 }

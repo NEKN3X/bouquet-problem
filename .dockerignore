@@ -1,6 +1,5 @@
 Dockerfile
 .dockerignore
-node_modules
 mysql
 npm-debug.log
 README.md
