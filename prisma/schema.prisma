@@ -21,7 +21,7 @@ model Flower {
     name             String
     deliveryDays     Int // 発注リードタイム
     purchaseUnit     Int // 発注単位
-    maintainableDays Int // 品質維持可能日数 @map("maintanableDays")
+    maintainableDays Int // 品質維持可能日数
     purchaseDetails  PurchaseOrderDetail[]
     flowerLots       FlowerLot[]
     components       BouquetComponent[]
@@ -51,7 +51,7 @@ model PurchaseOrder {
     id              Int                   @id @default(autoincrement())
     supplierName    String // 仕入先
     orderedAt       DateTime              @default(now())
-    deliveryDate    DateTime              @db.Date // 希望納品日 @map("deliveryAt")
+    deliveryDate    DateTime              @db.Date // 希望納品日
     purchaseDetails PurchaseOrderDetail[]
     purchaseArrival PurchaseOrderArrival?
 }

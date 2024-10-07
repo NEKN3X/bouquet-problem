@@ -8,7 +8,6 @@ import { db } from "~/server/db";
 
 const fetchFlowers = async (input: PlaceOrderInput): Promise<PurchaseOrder> => {
   const flowerIds = input.details.map(R.prop("flowerId"));
-  // const flowerIds = input.details.map((d) => d.flowerId);
   const flowers = await db.flower.findMany({ where: { id: { in: flowerIds } } });
   const flowerMap = new Map(flowers.map((f) => [f.id, f]));
   const details = input.details.map((d) => {
