@@ -1,15 +1,15 @@
 import { z } from "zod";
 import { DateString } from "~/utils/zod-schema";
 
-const OrderDetail = z.object({
+const PurchaseOrderDetail = z.object({
   flowerId: z.number(),
   orderUnit: z.number(),
 });
 
-export const PlaceOrderInput = z.object({
+export const CreatePurchaseOrderInput = z.object({
   supplierName: z.string(),
   deliveryDate: DateString,
-  details: z.array(OrderDetail).min(1),
+  details: z.array(PurchaseOrderDetail).min(1),
 });
 
-export type PlaceOrderInput = z.infer<typeof PlaceOrderInput>;
+export type CreatePurchaseOrderInput = z.infer<typeof CreatePurchaseOrderInput>;

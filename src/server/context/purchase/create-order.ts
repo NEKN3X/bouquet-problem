@@ -1,16 +1,16 @@
 import { TRPCError } from "@trpc/server";
 import * as R from "remeda";
 import { adminProcedure } from "~/server/api/trpc";
-import { PlaceOrderInput } from "~/server/context/purchase/api-schema";
+import { CreatePurchaseOrderInput } from "~/server/context/purchase/api-schema";
 import { type CreatedPurchaseOrder, type PurchaseOrder } from "~/server/context/purchase/types";
 import { checkDeliverable } from "~/server/context/purchase/util";
 import { db } from "~/server/db";
 
-const fetchFlowers = async (input: PlaceOrderInput): Promise<PurchaseOrder> => {
+const createOrder = async (input: CreatePurchaseOrderInput): Promise<PurchaseOrder> => {
   const flowerIds = input.details.map(R.prop("flowerId"));
   const flowers = await db.flower.findMany({ where: { id: { in: flowerIds } } });
   const flowerMap = new Map(flowers.map((f) => [f.id, f]));
-  const details = input.details.map((d) => {
+  const purchaseDetails = input.details.map((d) => {
     const flower = flowerMap.get(d.flowerId);
     if (flower === undefined) throw new TRPCError({ code: "BAD_REQUEST", message: "選択した花が見つかりません" });
     return {
@@ -23,7 +23,7 @@ const fetchFlowers = async (input: PlaceOrderInput): Promise<PurchaseOrder> => {
   return {
     supplierName: input.supplierName,
     deliveryDate: new Date(input.deliveryDate),
-    purchaseDetails: details,
+    purchaseDetails: purchaseDetails,
   };
 };
 
@@ -49,8 +49,8 @@ const persistOrder = async (order: PurchaseOrder): Promise<CreatedPurchaseOrder>
   return data;
 };
 
-export const createOrder = adminProcedure.input(PlaceOrderInput).mutation(async ({ input }) => {
-  const order = await fetchFlowers(input);
+export const createPurchaseOrder = adminProcedure.input(CreatePurchaseOrderInput).mutation(async ({ input }) => {
+  const order = await createOrder(input);
 
   if (!checkDeliverable(order))
     throw new TRPCError({
