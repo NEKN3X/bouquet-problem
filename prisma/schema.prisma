@@ -17,7 +17,7 @@ datasource db {
 // 花
 model Flower {
     id               Int                   @id @default(autoincrement())
-    code             String
+    code             String                @unique
     name             String
     deliveryDays     Int // 発注リードタイム
     purchaseUnit     Int // 発注単位

@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { purchaseRouter } from "~/server/context/purchase/router";
+import { maintenanceRouter } from "../context/maintenance/router";
 
 /**
  * This is the primary router for your server.
@@ -9,6 +10,7 @@ import { purchaseRouter } from "~/server/context/purchase/router";
 export const appRouter = createTRPCRouter({
   healthcheck: publicProcedure.query(() => "yay!"),
   purchase: purchaseRouter,
+  maintenance: maintenanceRouter,
 });
 
 // export type definition of API

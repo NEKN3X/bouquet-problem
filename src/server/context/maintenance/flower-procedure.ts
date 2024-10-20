@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { adminProcedure } from "~/server/api/trpc";
@@ -5,7 +6,7 @@ import { CreateFlowerInput, FlowerId, UpdateFlowerInput } from "./api-schema";
 
 // 花の一覧を取得する
 export const getFlowers = adminProcedure.query(async ({ ctx }) => {
-  return await ctx.db.flower.findMany();
+  return await ctx.db.flower.findMany({ orderBy: { code: "asc" } });
 });
 
 // 花を取得する
@@ -17,7 +18,16 @@ export const getFlower = adminProcedure.input(z.object({ id: FlowerId })).query(
 
 // 花を登録する
 export const createFlower = adminProcedure.input(CreateFlowerInput).mutation(async ({ ctx, input }) => {
-  const flower = await ctx.db.flower.create({ data: input });
+  const flower = await ctx.db.flower.create({ data: input }).catch((e) => {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === "P2002") {
+        if (e.meta?.target === "Flower_code_key") {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "その花コードは既に登録されています" });
+        }
+      }
+      throw e;
+    }
+  });
   return flower;
 });
 

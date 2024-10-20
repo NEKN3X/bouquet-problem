@@ -1,17 +1,18 @@
-import { LatestPost } from "~/app/_components/post";
+import { Container, NavLink, Stack } from "@mantine/core";
 import { getServerAuthSession } from "~/server/auth";
 import { HydrateClient } from "~/trpc/server";
-import styles from "./index.module.css";
 
 export default async function Home() {
   const session = await getServerAuthSession();
 
   return (
     <HydrateClient>
-      <main className={styles.main}>
-        <div className={styles.container}>
-          <LatestPost />
-        </div>
+      <main style={{ position: "relative", zIndex: 1 }}>
+        <Container size={"xs"}>
+          <Stack>
+            <NavLink label="アドミン" href="/admin" />
+          </Stack>
+        </Container>
       </main>
     </HydrateClient>
   );
