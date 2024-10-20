@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server";
 import * as R from "remeda";
 import { adminProcedure } from "~/server/api/trpc";
 import { CreatePurchaseOrderInput } from "~/server/context/purchase/api-schema";
-import { type CreatedPurchaseOrder, type PurchaseOrder } from "~/server/context/purchase/types";
 import { checkDeliverable } from "~/server/context/purchase/util";
 import { db } from "~/server/db";
+import type { PurchaseOrder, CreatedPurchaseOrder } from "~/server/context/purchase/types";
 
 const createOrder = async (input: CreatePurchaseOrderInput): Promise<PurchaseOrder> => {
   const flowerIds = input.details.map(R.prop("flowerId"));

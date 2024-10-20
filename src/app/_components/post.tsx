@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
-import { api } from "~/trpc/react";
-import styles from "../index.module.css";
 import { Button } from "@mantine/core";
 import dayjs from "dayjs";
+import { api } from "~/trpc/react";
 
 export function LatestPost() {
   // orderボタンを作る
